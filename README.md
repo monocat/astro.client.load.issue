@@ -6,6 +6,8 @@ When a user selects a category (listingType) and clicks the "Add Listing" button
 
 ![alt text](image.png)
 
+Using [daisyUI Filter](https://daisyui.com/components/filter/) on categories. 
+
 # Actual Result
 
 In the browser's console log, receiving various errors depending on current changes. The current file and "npm run dev' is ran, receving `Failed to load module script: Expected a JavaScript module script but the server responded with a MIME type of "text/html". Strict MIME type checking is enforced for module scripts per HTML spec.
