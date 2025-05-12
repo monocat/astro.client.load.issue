@@ -1,0 +1,30 @@
+{
+  "extends": "astro/tsconfigs/strict",
+
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"],
+      "@layouts/*": ["./src/layouts/*"],
+      "@pages/*": ["./src/pages/*"],
+      "@styles/*": ["./src/styles/*"],
+      "@utils/*": ["./src/utils/*"],
+      "@firebase/*": ["./src/firebase/*"],
+      "@lib/*": ["./src/lib/*"]
+      // Use the new React JSX transform for .tsx/.jsx files
+    },
+    "jsx": "react-jsx",
+    "jsxImportSource": "react",
+
+    // Bring in both Astro and React types
+    "types": ["astro/client", "react", "react-dom", "vite/client"]
+  },
+  "include": [
+    ".astro/types.d.ts",
+    "src/global.d.ts", // <-- add this line
+    "src/**/*",
+    "astro.config.mjs"
+  ],
+  "exclude": ["dist"]
+}

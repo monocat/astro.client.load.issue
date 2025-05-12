@@ -1,0 +1,147 @@
+---
+import { getFirestore } from "firebase-admin/firestore";
+
+import { app } from "@/firebase/server";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+
+interface ListingType {
+  id: string;
+  name: string;
+  slug: string;
+  fields: {
+    key: string;
+    type: "string" | "number" | "timestamp";
+    required: boolean;
+  }[];
+}
+
+const db = getFirestore(app);
+const typesSnap = await db.collection("listingTypes").get();
+const listingTypes = typesSnap.docs.map((doc) => ({
+  id: doc.id,
+  ...(doc.data() as Omit<ListingType, "id">),
+}));
+
+// Stringify listingTypes for define:vars
+const listingTypesJSON = JSON.stringify(listingTypes);
+---
+
+<BaseLayout title="Add a Listing">
+  <div class="container mx-auto p-6 space-y-6">
+    <h1 class="text-3xl font-bold text-center">Add a Listing</h1>
+
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body space-y-4">
+        <!-- 1) YOUR daisyUI filter component back -->
+        <div class="form-control">
+          <label class="label"
+            ><span class="label-text">Select a Category</span></label
+          >
+          <form class="filter" id="type-select">
+            <input
+              class="btn btn-square"
+              type="reset"
+              value="×"
+              onclick="resetForm()"
+            />
+            {
+              listingTypes.map((t) => (
+                <input
+                  class="btn"
+                  type="radio"
+                  value={t.id}
+                  name="listingType"
+                  aria-label={t.name}
+                />
+              ))
+            }
+          </form>
+        </div>
+
+        <!-- 2) Always-visible Add Listing button -->
+        <button id="add-listing-btn" class="btn btn-secondary" type="button">
+          Add Listing
+        </button>
+
+        <!-- 3) Dynamic form (hidden until Add Listing clicked) -->
+        <form
+          id="dynamic-form"
+          data-listing-type-id=""
+          class="hidden bg-white p-6 rounded-lg shadow space-y-4"
+        >
+          <div role="alert" class="alert alert-info">
+            <span id="category-name">This form is for …</span>
+          </div>
+
+          <!-- common fields -->
+          <div class="form-control w-full">
+            <label class="label"><span class="label-text">Title *</span></label>
+            <input
+              name="title"
+              type="text"
+              required
+              class="input input-bordered w-full"
+            />
+          </div>
+
+          <div class="form-control w-full">
+            <label class="label"
+              ><span class="label-text">Description *</span></label
+            >
+            <textarea
+              name="description"
+              required
+              class="textarea textarea-bordered w-full"></textarea>
+          </div>
+
+          <div class="form-control w-full">
+            <label class="label"><span class="label-text">Price *</span></label>
+            <input
+              name="price"
+              type="number"
+              required
+              class="input input-bordered w-full"
+            />
+          </div>
+
+          <!-- type‐specific fields -->
+          <div id="type-fields" class="space-y-4"></div>
+
+          <button type="submit" class="btn btn-primary w-full">
+            <span id="category-name-submit-listing">Submit Listing</span>
+          </button>
+        </form>
+
+        <p id="message" class="text-center text-red-500"></p>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" client:load define:vars={{ listingTypesJSON }}>
+    import { initAddListing } from "../../lib/initAddListing";
+
+    // Parse and initialize
+    const listingTypes = JSON.parse(listingTypesJSON);
+    initAddListing(listingTypes);
+
+    // resetForm hides the dynamic form
+    window.resetForm = () => {
+      const dynamicForm = document.getElementById("dynamic-form");
+      if (dynamicForm) {
+        dynamicForm.classList.add("hidden");
+      }
+      const categoryNameElement = document.getElementById("category-name");
+      if (categoryNameElement) {
+        categoryNameElement.textContent = "This form is for …";
+      }
+      const addListingBtn = document.getElementById("add-listing-btn");
+      if (addListingBtn) {
+        addListingBtn.classList.remove("hidden");
+      }
+      const messageElement = document.getElementById("message");
+      if (messageElement) {
+        messageElement.textContent = "";
+      }
+    };
+  </script>
+</BaseLayout>
